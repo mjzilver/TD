@@ -3,10 +3,11 @@ import { Monster } from './monster.js';
 export class Boss extends Monster {
     constructor(x, y) {
         super(x, y);
-        this.char = 'B';
+        this.char = 'X';
         this.path = [];
         this.hp = 100;
         this.damage = 10;
+        this.canMoveDiagonally = true;
     }
 
     moveTo(x, y) {

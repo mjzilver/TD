@@ -5,6 +5,7 @@ export function render(ctx, entities, cameraX, cameraY, tileSize, mapWidth, mapH
 }
 
 function drawMap(ctx, cameraX, cameraY, tileSize, mapWidth, mapHeight) {
+    ctx.strokeStyle = 'gray';
     for (let y = 0; y < mapHeight; y++) {
         for (let x = 0; x < mapWidth; x++) {
             const screenX = (x * tileSize) - cameraX;
