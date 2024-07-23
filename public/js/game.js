@@ -1,18 +1,16 @@
 import { Base } from './entities/base.js';
 import { Tower } from './entities/tower.js';
 import { Wall } from './entities/wall.js';
-import { Monster } from './entities/monster.js';
-import { Arrow } from './entities/arrow.js';
 import { Particle } from './entities/particle.js';
 import { Bomb } from './entities/bomb.js';
 import { BombTower } from './entities/bomb-tower.js';
 
 import { render } from './renderer.js';
-import { findPath, validatePath } from './pathfinding.js';
 import { outOfBoundsCheck } from './utils.js';
 import { MonsterSpawner } from './monster-spawner.js';
 import { drawUI } from './ui.js';
 import { Quadtree, Rectangle } from './quadtree.js';
+import { PathFinder } from './pathfinding.js';
 
 class Game {
     constructor() {
@@ -42,6 +40,7 @@ class Game {
 
         this.monsterSpawner = new MonsterSpawner(this.mapWidth, this.mapHeight);
         this.quadtree = new Quadtree(0, 0, this.mapWidth * this.tileSize, this.mapHeight * this.tileSize);
+        this.pathFinder = new PathFinder(this.mapWidth, this.mapHeight, this);
 
         this.entities = {
             base: new Base(this.mapWidth / 2, this.mapHeight / 2),
@@ -54,34 +53,6 @@ class Game {
 
         this.initEventListeners();
         this.gameLoop();
-        this.debugSetup()
-    }
-
-    debugSetup() {
-        // + shape of bomb towers around base
-        for (let i = 1; i < 10; i++) {
-            this.entities.towers.push(new BombTower(this.entities.base.x + i, this.entities.base.y));
-            this.entities.towers.push(new BombTower(this.entities.base.x - i, this.entities.base.y));
-            this.entities.towers.push(new BombTower(this.entities.base.x, this.entities.base.y + i));
-            this.entities.towers.push(new BombTower(this.entities.base.x, this.entities.base.y - i));
-        }
-        // x shape of towers around base
-        for (let i = 1; i < 10; i++) {
-            this.entities.towers.push(new Tower(this.entities.base.x + i, this.entities.base.y + i));
-            this.entities.towers.push(new Tower(this.entities.base.x - i, this.entities.base.y - i));
-            this.entities.towers.push(new Tower(this.entities.base.x + i, this.entities.base.y - i));
-            this.entities.towers.push(new Tower(this.entities.base.x - i, this.entities.base.y + i));
-        }
-
-        // square of walls around base
-        for (let i = -10; i < 11; i++) {
-            this.entities.walls.push(new Wall(this.entities.base.x + i, this.entities.base.y + 10));
-            this.entities.walls.push(new Wall(this.entities.base.x - i, this.entities.base.y - 10));
-            this.entities.walls.push(new Wall(this.entities.base.x + 10, this.entities.base.y + i));
-            this.entities.walls.push(new Wall(this.entities.base.x - 10, this.entities.base.y - i));
-        }
-        this.entities.base.hp = 1000;
-        this.gameTicks = 1000;
     }
 
     initEventListeners() {
@@ -135,20 +106,29 @@ class Game {
         this.entities.monsters = this.entities.monsters.filter(m => m !== monsterAt);
     }
 
+    invalidateAllPaths() {
+        this.entities.monsters.forEach(monster => {
+            monster.setPath([]);
+        });
+    }
+
     updateMonsters() {
         this.entities.monsters.forEach(monster => {
             let path = monster.getPath();
 
             // check if the saved path is still good
-            if (!path || path.length <= 1 || !validatePath(path, monster, this.getBuildingAtPosition.bind(this))) {
-                path = findPath(monster.x, monster.y, this.entities.base.x, this.entities.base.y, this.mapWidth, this.mapHeight, this.getBuildingAtPosition.bind(this), monster);
+            if (!path || path.length <= 1) {
+                path = this.pathFinder.findPath(monster.x, monster.y, this.entities.base.x, this.entities.base.y, monster);
+                monster.setPath(path);
+            } else {
+                path.shift();
                 monster.setPath(path);
             }
 
             if (path.length > 1) {
                 const nextPosition = path[1];
                 let building = this.getBuildingAtPosition(nextPosition.x, nextPosition.y);
-                let monsterAt = this.entities.monsters.find(m => m.x === nextPosition.x && m.y === nextPosition.y);
+                let monsterAt = this.entities.monsters.find(m => m.x === nextPosition.x && m.y === nextPosition.y && m !== monster);
 
                 if (monsterAt) {
                     this.combineMonsters(monster, monsterAt);
@@ -295,12 +275,23 @@ class Game {
         }
 
         this.entities.arrows.forEach(arrow => {
-            let possibleCollisions = this.quadtree.query(new Rectangle(arrow.x, arrow.y, this.tileSize, this.tileSize));
+            let possibleCollisions = this.quadtree.query(
+                new Rectangle(
+                    arrow.x - this.tileSize / 2, 
+                    arrow.y - this.tileSize / 2, 
+                    this.tileSize , 
+                    this.tileSize
+                )
+            );
 
             for (let possibleCollision of possibleCollisions) {
                 const monster = possibleCollision.entity;
-                const distance = Math.sqrt((arrow.x - monster.x * this.tileSize) ** 2 + (arrow.y - monster.y * this.tileSize) ** 2);
-
+                const monsterX = monster.x * this.tileSize;
+                const monsterY = monster.y * this.tileSize;
+                const arrowX = arrow.x - this.tileSize / 2;
+                const arrowY = arrow.y - this.tileSize / 2;
+                const distance = Math.sqrt((arrowX - monsterX) ** 2 + (arrowY - monsterY) ** 2);
+    
                 if (arrow instanceof Bomb) {
                     if (distance < this.tileSize) {
                         const blastRadius = arrow.blastRadius
@@ -361,17 +352,29 @@ class Game {
             } else if (event.ctrlKey) {
                 if (wallIndex !== -1) {
                     this.entities.walls.splice(wallIndex, 1);
-                    this.entities.towers.push(new Tower(x, y));
+                    this.placeBuilding(new BombTower(x, y), x, y);
                 } else if (towerIndex !== -1) {
                     this.entities.towers.splice(towerIndex, 1);
-                    this.entities.towers.push(new BombTower(x, y));
+                    this.placeBuilding(new Wall(x, y, 'W'), x, y);
                 }
             }
         } else if (event.ctrlKey) {
-            this.entities.towers.push(new Tower(x, y));
+            this.placeBuilding(new Tower(x, y), x, y);
         } else {
-            this.entities.walls.push(new Wall(x, y, 'W'));
+            this.placeBuilding(new Wall(x, y, 'W'), x, y);
         }
+    }
+
+    placeBuilding(building, x, y) {
+        if (this.isPositionOccupied(x, y)) return;
+
+        if (building instanceof Tower || building instanceof BombTower) {
+            this.entities.towers.push(building);
+        } else if (building instanceof Wall) {
+            this.entities.walls.push(building);
+        }
+
+        this.invalidateAllPaths();
     }
 
     handleKeydown(event) {
@@ -388,9 +391,6 @@ class Game {
                 break;
             case 'ArrowRight':
                 this.cameraX += moveAmount;
-                break;
-            case 'm':
-                this.monsterSpawner.forceSpawn(this.entities.monsters, this);
                 break;
         }
     }

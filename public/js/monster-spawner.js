@@ -19,10 +19,6 @@ export class MonsterSpawner {
         return interval;
     }
 
-    forceSpawn(monsters, gameEngine) {
-        this.spawn(monsters, 0, gameEngine);
-    }
-
     spawn(monsters, currentTicks, gameEngine) {
         let spawnInterval = this.linearInterpolation(currentTicks, 3000, 1, 50);
 
