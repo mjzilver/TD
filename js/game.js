@@ -372,6 +372,35 @@ class Game {
             this.entities.towers.push(building);
         } else if (building instanceof Wall) {
             this.entities.walls.push(building);
+
+            // check if the wall is connected to another wall
+            const neighbors = this.pathFinder.getNeighbors({ x, y }, this.mapWidth, this.mapHeight, false);
+            neighbors.forEach(neighbor => {
+                const neighborWall = this.entities.walls.find(wall => wall.x === neighbor.x && wall.y === neighbor.y);
+                if (neighborWall) {
+                    const dx = neighbor.x - x;
+                    const dy = neighbor.y - y;
+
+                    if (dx === 0) {
+                        if (dy === -1) {
+                            building.connections.north = true;
+                            neighborWall.connections.south = true;
+                        } else {
+                            building.connections.south = true;
+                            neighborWall.connections.north = true;
+                        }
+                    } else {
+                        if (dx === -1) {
+                            building.connections.west = true;
+                            neighborWall.connections.east = true;
+                        } else {
+                            building.connections.east = true;
+                            neighborWall.connections.west = true;
+                        }
+                    }
+                }
+            });
+
         }
 
         this.invalidateAllPaths();

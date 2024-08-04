@@ -1,3 +1,29 @@
+import { BombTower } from "./entities/bomb-tower.js";
+import { Boss } from "./entities/boss.js";
+import { TileImage } from "./entities/tile-image.js";
+
+// load the images
+const tiles = {
+    tower: new TileImage("tower", "tiles/tower.png"),
+    bombTower: new TileImage("bombTower", "tiles/bomb-tower.png"),
+    monster: new TileImage("monster", "tiles/enemy.png"),
+    ground: new TileImage("ground", "tiles/grass.png"),
+    base: new TileImage("base", "tiles/base.png"),
+    boss: new TileImage("boss", "tiles/boss.png"),
+    wall: new TileImage("wall", "tiles/wall.png"),
+    'horizontal-wall': new TileImage("horizontal-wall", "tiles/horizontal-wall.png"),
+    'vertical-wall': new TileImage("vertical-wall", "tiles/vertical-wall.png"),
+    'corner-wall-top-right': new TileImage("corner-wall-top-right", "tiles/corner-wall-top-right.png"),
+    'corner-wall-top-left': new TileImage("corner-wall-top-left", "tiles/corner-wall-top-left.png"),
+    'corner-wall-bottom-right': new TileImage("corner-wall-bottom-right", "tiles/corner-wall-bottom-right.png"),
+    'corner-wall-bottom-left': new TileImage("corner-wall-bottom-left", "tiles/corner-wall-bottom-left.png"),
+    'wall-north': new TileImage("wall-north", "tiles/wall-north.png"),
+    'wall-east': new TileImage("wall-east", "tiles/wall-east.png"),
+    'wall-south': new TileImage("wall-south", "tiles/wall-south.png"),
+    'wall-west': new TileImage("wall-west", "tiles/wall-west.png"),
+};
+
+
 export function render(ctx, entities, cameraX, cameraY, tileSize, mapWidth, mapHeight) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     drawMap(ctx, cameraX, cameraY, tileSize, mapWidth, mapHeight);
@@ -12,7 +38,8 @@ function drawMap(ctx, cameraX, cameraY, tileSize, mapWidth, mapHeight) {
             const screenY = (y * tileSize) - cameraY;
 
             if (screenX + tileSize > 0 && screenX < ctx.canvas.width && screenY + tileSize > 0 && screenY < ctx.canvas.height) {
-                ctx.strokeRect(screenX, screenY, tileSize, tileSize);
+                //ctx.strokeRect(screenX, screenY, tileSize, tileSize);
+                ctx.drawImage(tiles.ground.image, screenX, screenY, tileSize, tileSize);
             }
         }
     }
@@ -21,10 +48,32 @@ function drawMap(ctx, cameraX, cameraY, tileSize, mapWidth, mapHeight) {
 function drawEntities(ctx, entities, cameraX, cameraY, tileSize) {
     // set font for entities
     ctx.font = `${tileSize}px Monospace`;
-    entities.base.draw(ctx, cameraX, cameraY, tileSize);
-    entities.towers.forEach(tower => tower.draw(ctx, cameraX, cameraY, tileSize));
-    entities.walls.forEach(wall => wall.draw(ctx, cameraX, cameraY, tileSize));
-    entities.monsters.forEach(monster => monster.draw(ctx, cameraX, cameraY, tileSize));
+
+    drawTile(ctx, 'base', entities.base.x, entities.base.y, tileSize);
+
+    entities.towers.forEach(tower => { 
+        if (tower instanceof BombTower) {
+            drawTile(ctx, 'bombTower', tower.x, tower.y, tileSize);
+        } else {
+            drawTile(ctx, 'tower', tower.x, tower.y, tileSize);
+        }
+    });
+
+    entities.walls.forEach(wall => {
+        drawTile(ctx, wall.getRenderData(), wall.x, wall.y, tileSize);
+    });
+
+    entities.monsters.forEach(monster => {
+        if (monster instanceof Boss) {
+            drawTile(ctx, 'boss', monster.x, monster.y, tileSize);
+        } else {
+            drawTile(ctx, 'monster', monster.x, monster.y, tileSize);
+        }
+    });	
     entities.arrows.forEach(arrow => arrow.draw(ctx, cameraX, cameraY));
     entities.particles.forEach(particle => particle.draw(ctx, cameraX, cameraY));
+}
+
+function drawTile(ctx, tile, x, y, tileSize) {
+    ctx.drawImage(tiles[tile].image, x * tileSize, y * tileSize, tileSize, tileSize);
 }

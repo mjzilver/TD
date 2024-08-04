@@ -1,6 +1,8 @@
 import { Boss } from './entities/boss.js';
 import { Monster } from './entities/monster.js';
 
+const highest = 5 * 6000;
+
 export class MonsterSpawner {
     constructor(mapWidth, mapHeight) {
         this.mapWidth = mapWidth;
@@ -20,7 +22,7 @@ export class MonsterSpawner {
     }
 
     spawn(monsters, currentTicks, gameEngine) {
-        let spawnInterval = this.linearInterpolation(currentTicks, 3000, 1, 50);
+        let spawnInterval = this.linearInterpolation(currentTicks, highest, 1, 50);
 
         if (currentTicks - this.previousTicks < spawnInterval) {
             return;
@@ -56,8 +58,8 @@ export class MonsterSpawner {
             mon = new Boss(x, y);
             this.lastBossSpawn = currentTicks;
         } else {
-            mon.hp = Math.floor(this.linearInterpolation(currentTicks, 6000, 50, 5));
-            mon.damage = Math.floor(this.linearInterpolation(currentTicks, 6000, 8, 1));
+            mon.hp = Math.floor(this.linearInterpolation(currentTicks, highest, 50, 5));
+            mon.damage = Math.floor(this.linearInterpolation(currentTicks, highest, 8, 1));
         }
 
         // Check if the spawn point is blocked
