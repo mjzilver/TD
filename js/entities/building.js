@@ -5,5 +5,7 @@ export class Building extends GameEntity {
         super(x, y);
         this.hp = 10;
         this.char = char;
+        this.cost = 10;
+        this.upgradeCost = 0;
     }
 }

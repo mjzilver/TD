@@ -10,6 +10,7 @@ export class BombTower extends Tower {
         this.delay = 60;
         this.lastShot = 0;
         this.damage = 15;
+        this.cost = 50;
     }
 
     canShoot(currentTicks) {

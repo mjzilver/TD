@@ -170,8 +170,8 @@ class Game {
                 const vx = (dx / length) * speed;
                 const vy = (dy / length) * speed;
 
-                const towerMiddleX = (tower.x * this.tileSize);
-                const towerMiddleY = (tower.y * this.tileSize) + this.tileSize;
+                const towerMiddleX = (tower.x * this.tileSize) + this.tileSize / 2;
+                const towerMiddleY = (tower.y * this.tileSize) + this.tileSize / 2;
 
                 let arr = tower.createArrow(towerMiddleX, towerMiddleY, vx, vy);
 
@@ -219,7 +219,9 @@ class Game {
     }
 
     isPositionOccupied(x, y) {
-        return this.getBuildingAtPosition(x, y) !== null || this.entities.monsters.some(monster => monster.x === x && monster.y === y) || outOfBoundsCheck(x, y, this.mapWidth, this.mapHeight);
+        return this.getBuildingAtPosition(x, y) !== null 
+            || this.entities.monsters.some(monster => monster.x === x && monster.y === y) 
+            || outOfBoundsCheck(x, y, this.mapWidth, this.mapHeight);
     }
 
     destroyBuilding(building) {
@@ -340,23 +342,12 @@ class Game {
         const y = Math.floor((event.clientY + this.cameraY) / this.tileSize);
 
         if (this.isPositionOccupied(x, y)) {
-            const wallIndex = this.entities.walls.findIndex(wall => wall.x === x && wall.y === y);
-            const towerIndex = this.entities.towers.findIndex(tower => tower.x === x && tower.y === y);
-
+            // shift is removal
             if (event.shiftKey) {
-                if (wallIndex !== -1) {
-                    this.entities.walls.splice(wallIndex, 1);
-                } else if (towerIndex !== -1) {
-                    this.entities.towers.splice(towerIndex, 1);
-                }
+                this.removeBuilding(this.getBuildingAtPosition(x, y));
+            // ctrl is upgrade
             } else if (event.ctrlKey) {
-                if (wallIndex !== -1) {
-                    this.entities.walls.splice(wallIndex, 1);
-                    this.placeBuilding(new BombTower(x, y), x, y);
-                } else if (towerIndex !== -1) {
-                    this.entities.towers.splice(towerIndex, 1);
-                    this.placeBuilding(new Wall(x, y, 'W'), x, y);
-                }
+               this.upgradeBuilding(this.getBuildingAtPosition(x, y));
             }
         } else if (event.ctrlKey) {
             this.placeBuilding(new Tower(x, y), x, y);
@@ -365,8 +356,31 @@ class Game {
         }
     }
 
+    upgradeBuilding(building) {
+        if (building instanceof Tower) {
+            if (this.gold >= 50) {
+                this.removeBuilding(building);
+                this.placeBuilding(new BombTower(building.x, building.y), building.x, building.y);
+            }
+        }
+    }
+
+    removeBuilding(building) {
+        if (building instanceof Wall) {
+            this.entities.walls = this.entities.walls.filter(wall => wall !== building);
+        } else if (building instanceof Tower) {
+            this.entities.towers = this.entities.towers.filter(tower => tower !== building);
+        }
+
+        this.invalidateAllPaths();
+    }
+
     placeBuilding(building, x, y) {
         if (this.isPositionOccupied(x, y)) return;
+
+        if(building.cost > this.gold) return;
+
+        this.gold -= building.cost;
 
         if (building instanceof Tower || building instanceof BombTower) {
             this.entities.towers.push(building);

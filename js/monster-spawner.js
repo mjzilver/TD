@@ -2,6 +2,7 @@ import { Boss } from './entities/boss.js';
 import { Monster } from './entities/monster.js';
 
 const highest = 5 * 6000;
+const bossSpawnInterval = 500;
 
 export class MonsterSpawner {
     constructor(mapWidth, mapHeight) {
@@ -53,8 +54,7 @@ export class MonsterSpawner {
 
         let mon = new Monster(x, y);
 
-        // Every 200 ticks, spawn a boss
-        if (this.lastBossSpawn + 200 < currentTicks) {
+        if (this.lastBossSpawn + bossSpawnInterval < currentTicks) {
             mon = new Boss(x, y);
             this.lastBossSpawn = currentTicks;
         } else {

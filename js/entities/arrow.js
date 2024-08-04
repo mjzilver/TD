@@ -18,6 +18,11 @@ export class Arrow extends GameEntity {
     draw(ctx, cameraX, cameraY) {
         ctx.fillStyle = 'black';
         ctx.font = `${this.size}px Monospace`;	
-        ctx.fillText(this.char, this.x - cameraX, this.y - cameraY);
+        ctx.textAlign = 'center';
+        ctx.fillText(this.char, 
+            this.x - cameraX - this.size / 2,
+            this.y - cameraY + this.size / 2 
+        );
+
     }
 }

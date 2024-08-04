@@ -4,19 +4,13 @@ export class Wall extends Building {
     constructor(x, y) {
         super(x, y, 'W');
         this.hp = 5;
+        this.cost = 5;
 
         this.connections = {
             north: false,
             east: false,
             south: false,
             west: false
-        };
-
-        this.connectionPoints = {
-            north: { x: 0, y: -1 },
-            east: { x: 1, y: 0 },
-            south: { x: 0, y: 1 },
-            west: { x: -1, y: 0 }
         };
     }
 

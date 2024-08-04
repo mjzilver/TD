@@ -1,16 +1,19 @@
 import { BombTower } from "./entities/bomb-tower.js";
+import { Bomb } from "./entities/bomb.js";
 import { Boss } from "./entities/boss.js";
 import { TileImage } from "./entities/tile-image.js";
 
 // load the images
 const tiles = {
-    tower: new TileImage("tower", "tiles/tower.png"),
-    bombTower: new TileImage("bombTower", "tiles/bomb-tower.png"),
-    monster: new TileImage("monster", "tiles/enemy.png"),
-    ground: new TileImage("ground", "tiles/grass.png"),
-    base: new TileImage("base", "tiles/base.png"),
-    boss: new TileImage("boss", "tiles/boss.png"),
-    wall: new TileImage("wall", "tiles/wall.png"),
+    'tower': new TileImage("tower", "tiles/tower.png"),
+    'bombTower': new TileImage("bombTower", "tiles/bomb-tower.png"),
+    'monster': new TileImage("monster", "tiles/enemy.png"),
+    'ground': new TileImage("ground", "tiles/grass.png"),
+    'base': new TileImage("base", "tiles/base.png"),
+    'bigbase': new TileImage("bigbase", "tiles/3xdbase.png"),
+    'bomb': new TileImage("bomb", "tiles/bomb.png"),
+    'boss': new TileImage("boss", "tiles/boss.png"),
+    'wall': new TileImage("wall", "tiles/wall.png"),
     'horizontal-wall': new TileImage("horizontal-wall", "tiles/horizontal-wall.png"),
     'vertical-wall': new TileImage("vertical-wall", "tiles/vertical-wall.png"),
     'corner-wall-top-right': new TileImage("corner-wall-top-right", "tiles/corner-wall-top-right.png"),
@@ -21,6 +24,7 @@ const tiles = {
     'wall-east': new TileImage("wall-east", "tiles/wall-east.png"),
     'wall-south': new TileImage("wall-south", "tiles/wall-south.png"),
     'wall-west': new TileImage("wall-west", "tiles/wall-west.png"),
+    'asterisk': new TileImage("asterisk", "tiles/asterisk.png"),
 };
 
 
@@ -70,7 +74,17 @@ function drawEntities(ctx, entities, cameraX, cameraY, tileSize) {
             drawTile(ctx, 'monster', monster.x, monster.y, tileSize);
         }
     });	
-    entities.arrows.forEach(arrow => arrow.draw(ctx, cameraX, cameraY));
+    entities.arrows.forEach(arrow => {
+        if (arrow instanceof Bomb) {
+            ctx.drawImage(tiles.bomb.image, 
+                arrow.x - cameraX - tileSize / 4,
+                arrow.y - cameraY - tileSize / 4,
+                tileSize / 2, 
+                tileSize / 2);
+        } else {
+            arrow.draw(ctx, cameraX, cameraY);
+        }
+    });
     entities.particles.forEach(particle => particle.draw(ctx, cameraX, cameraY));
 }
 

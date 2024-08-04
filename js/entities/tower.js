@@ -9,6 +9,7 @@ export class Tower extends Building {
         this.delay = 30;
         this.lastShot = 0;
         this.damage = 5;
+        this.cost = 20;
     }
 
     canShoot(currentTicks) {
