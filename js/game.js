@@ -419,24 +419,6 @@ class Game {
 
         this.invalidateAllPaths();
     }
-
-    handleKeydown(event) {
-        const moveAmount = 10;
-        switch (event.key) {
-            case 'ArrowUp':
-                this.cameraY -= moveAmount;
-                break;
-            case 'ArrowDown':
-                this.cameraY += moveAmount;
-                break;
-            case 'ArrowLeft':
-                this.cameraX -= moveAmount;
-                break;
-            case 'ArrowRight':
-                this.cameraX += moveAmount;
-                break;
-        }
-    }
 }
 
 new Game();

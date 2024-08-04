@@ -10,7 +10,6 @@ const tiles = {
     'monster': new TileImage("monster", "tiles/enemy.png"),
     'ground': new TileImage("ground", "tiles/grass.png"),
     'base': new TileImage("base", "tiles/base.png"),
-    'bigbase': new TileImage("bigbase", "tiles/3xdbase.png"),
     'bomb': new TileImage("bomb", "tiles/bomb.png"),
     'boss': new TileImage("boss", "tiles/boss.png"),
     'wall': new TileImage("wall", "tiles/wall.png"),
