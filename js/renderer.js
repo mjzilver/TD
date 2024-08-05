@@ -73,6 +73,7 @@ function drawEntities(ctx, entities, cameraX, cameraY, tileSize) {
             drawTile(ctx, 'monster', monster.x, monster.y, tileSize);
         }
     });	
+    
     entities.arrows.forEach(arrow => {
         if (arrow instanceof Bomb) {
             ctx.drawImage(tiles.bomb.image, 
