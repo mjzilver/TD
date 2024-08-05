@@ -176,6 +176,7 @@ class Game {
 
                 if (building) {
                     monster.attack(building);
+                    this.createParticlesAtTile(5, nextPosition.x, nextPosition.y, "black");
                     if (building.hp <= 0) {
                         this.destroyBuilding(building);
                     }
@@ -283,6 +284,7 @@ class Game {
         const y = tileY * this.tileSize + this.tileSize / 2;
 
         const radius = this.tileSize;
+        const velocityScale = 25;
 
         for (let i = 0; i < amount; i++) {
             const angle = Math.random() * 2 * Math.PI;
@@ -298,8 +300,8 @@ class Game {
             const targetX = Math.cos(targetAngle) * radius;
             const targetY = Math.sin(targetAngle) * radius;
 
-            const velocityX = (targetX - randomVelocityX) / 20;
-            const velocityY = (targetY - randomVelocityY) / 20;
+            const velocityX = (targetX - randomVelocityX) / velocityScale;
+            const velocityY = (targetY - randomVelocityY) / velocityScale;
 
             this.entities.particles.push(
                 new Particle(x, y,
@@ -357,7 +359,7 @@ class Game {
 
                         this.entities.arrows = this.entities.arrows.filter(a => a !== arrow);
                         this.createParticlesAtTile(10, monster.x, monster.y, "black");
-                        this.createParticlesAtTile(10, monster.x, monster.y, "grey");
+                        this.createParticlesAtTile(10, monster.x, monster.y, "yellow");
                     }
                 } else if (distance < this.tileSize) {
                     this.entities.arrows = this.entities.arrows.filter(a => a !== arrow);

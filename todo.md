@@ -2,14 +2,30 @@
 
 ## High Priority
 
+### Images
+- [x] Add images for buildings
+  - [x] Tower
+  - [x] Wall
+  - [x] Monster
+  - [x] Boss
+
+## Terrain
+- [x] Terrain generation 
+
 ### Currency
-- [ ] Add currency
-  - [ ] Towers = 10 coins
-  - [ ] Walls = 2 coins
-  - [ ] Convert monster HP to coins
+- [x] Add currency
+  - [x] Towers = 20 coins
+  - [x] Walls = 5 coins
+  - [x] Convert monster HP to coins
   - [ ] Boss = 200 coins
 
 ### Upgrading
+- going from normal to ice/bomb/poison/laser tower
+- [x] going from normal to bomb tower
+  - [ ] Use some kind of UI to select which tower to upgrade to
+ 
+### Improving
+- improving existing towers
 - [ ] Implement upgrading
   - [ ] Make it exponentially expensive
   - [ ] Double damage and HP on upgrade
@@ -30,25 +46,19 @@
   - [ ] Mine to get currency ($)
     - [ ] Consider a minecart that goes back and forth
     - [ ] Determine if it needs resources or can be placed anywhere
-  - [ ] Barracks to recruit troops (B)
-  - [X] Bomb tower with AOE attack (B)
-    - [X] Use 'o' as icon
-    - [ ] Use '#' as AOE icon (radius circle)
-  - [ ] Ice tower to slow enemies (I)
-    - [ ] Cyan arrow (*)
-  - [ ] Poison tower to do damage over time (P)
-    - [ ] Green arrow (*)
-  - [ ] Laser tower that shoots a beam in a straight line, hitting everything (L)
-    - [ ] Projectile is a line '-' or '|'
+  - [x] Bomb tower with AOE attack 
+  - [ ] Ice tower to slow enemies 
+  - [ ] Poison tower to do damage over time 
+  - [ ] Laser tower that shoots a beam in a straight line, hitting everything 
     - [ ] Cons: slow, expensive, cannot shoot diagonally
 
 ### Enemy Types
 - [ ] Add different enemy types
-  - [X] Normal (M)
-  - [ ] Speed (S)
-  - [ ] Tanky (T)
-  - [ ] Flying (F)
-  - [X] Boss (X)
+  - [X] Normal
+  - [ ] Speed
+  - [ ] Tanky 
+  - [ ] Flying
+  - [x] Boss 
 
 ## Low Priority
 
@@ -62,7 +72,7 @@
 - [ ] Add an enemy base that can be attacked with troops
 
 ### Performance Enhancements
-- [ ] Cache enemy path to improve performance
+- [X] Cache enemy path to improve performance
 
 ### Menu
 - [ ] Add a menu

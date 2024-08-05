@@ -7,10 +7,10 @@ export class TerrainGenerator {
         this.terrain = [];
     }
 
-    getTile(x, y) { 
+    getTile(x, y) {
         return this.terrain[x][y];
     }
-    
+
     generate() {
         // set everything as grass
         for (let x = 0; x < this.width; x++) {
@@ -20,6 +20,17 @@ export class TerrainGenerator {
             }
         }
 
+        const randomSpawns = randomBetween(1, 4);
+
+        for (let i = 0; i < randomSpawns; i++) {
+            this.spreadFromRandom();
+        }
+        this.findTransitionTiles();
+
+        return this.terrain;
+    }
+
+    spreadFromRandom() {
         // pick random starting point
         const x = randomBetween(0, this.width - 1);
         const y = randomBetween(0, this.height - 1);
@@ -27,10 +38,6 @@ export class TerrainGenerator {
         // spread 10-25 times from the starting point converting to sand
         const spreadAmount = randomBetween(10, 25);
         this.spread(x, y, TileTypes.sand, spreadAmount);
-        
-        this.findTransitionTiles();
-
-        return this.terrain;
     }
 
     spread(x, y, type, spreadAmount) {
@@ -68,7 +75,7 @@ export class TerrainGenerator {
             }
         }
     }
-    
+
     findTransitionTiles() {
         for (let x = 0; x < this.width; x++) {
             for (let y = 0; y < this.height; y++) {
