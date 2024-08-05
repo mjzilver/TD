@@ -32,6 +32,16 @@ const tiles = {
 
     /// WALLS
     'wall': new TileImage("tiles/wall.png"),
+
+    // four sided connections
+    'wall-all': new TileImage("tiles/wall-all.png"),
+
+    // three sided connections
+    'wall-three-top': new TileImage("tiles/wall-three-top.png"),
+    'wall-three-right': new TileImage("tiles/wall-three-top.png", 90),
+    'wall-three-bottom': new TileImage("tiles/wall-three-top.png", 180),
+    'wall-three-left': new TileImage("tiles/wall-three-top.png", 270),
+
     // two sided connections
     'horizontal-wall': new TileImage("tiles/horizontal-wall.png"),
     'vertical-wall': new TileImage("tiles/vertical-wall.png"),

@@ -16,6 +16,22 @@ export class Wall extends Building {
 
     getRenderData() {
         // check the connections and return the correct image
+        // check 4 connections first
+        if (this.connections.north && this.connections.east && this.connections.south && this.connections.west) {
+            return 'wall-all';
+        }
+
+        // three connections
+        if (this.connections.north && this.connections.east && this.connections.west) {
+            return 'wall-three-top';
+        } else if (this.connections.north && this.connections.east && this.connections.south) {
+            return 'wall-three-right';
+        } else if (this.connections.north && this.connections.south && this.connections.west) {
+            return 'wall-three-left';
+        } else if (this.connections.east && this.connections.south && this.connections.west) {
+            return 'wall-three-bottom';
+        }
+
         // vertical and horizontal walls go first       
         if (this.connections.north && this.connections.south) {
             return 'vertical-wall';
