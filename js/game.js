@@ -11,6 +11,7 @@ import { MonsterSpawner } from './monster-spawner.js';
 import { drawUI } from './ui.js';
 import { Quadtree, Rectangle } from './quadtree.js';
 import { PathFinder } from './pathfinding.js';
+import { TerrainGenerator } from './terrain-generator.js';
 
 class Game {
     constructor() {
@@ -33,7 +34,7 @@ class Game {
 
         this.isGameOver = false;
         this.gameTicks = 0;
-        this.gold = 100;
+        this.gold = 80;
         this.level = 1;
         this.cameraX = 0;
         this.cameraY = 0;
@@ -41,6 +42,7 @@ class Game {
         this.monsterSpawner = new MonsterSpawner(this.mapWidth, this.mapHeight);
         this.quadtree = new Quadtree(0, 0, this.mapWidth * this.tileSize, this.mapHeight * this.tileSize);
         this.pathFinder = new PathFinder(this.mapWidth, this.mapHeight, this);
+        this.terrainGenerator = new TerrainGenerator(this.mapWidth, this.mapHeight);
 
         this.entities = {
             base: new Base(this.mapWidth / 2, this.mapHeight / 2),
@@ -48,12 +50,48 @@ class Game {
             walls: [],
             monsters: [],
             arrows: [],
-            particles: []
+            particles: [],
+            terrain: []
         };
+
+        this.entities.terrain = this.terrainGenerator.generate();
 
         this.initEventListeners();
         this.gameLoop();
+        this.debugSetup();
     }
+
+    debugSetup() {
+        // Clear existing walls
+        this.entities.walls = [];
+    
+        // Draw a ring of walls 10 tiles away from the base
+        const ringRadius = 10;
+        for (let x = this.entities.base.x - ringRadius; x <= this.entities.base.x + ringRadius; x++) {
+            for (let y = this.entities.base.y - ringRadius; y <= this.entities.base.y + ringRadius; y++) {
+                const dx = x - this.entities.base.x;
+                const dy = y - this.entities.base.y;
+                const distanceSquared = dx * dx + dy * dy;
+                
+                if (distanceSquared >= ringRadius * ringRadius - 1 && distanceSquared <= ringRadius * ringRadius + 1) {
+                    this.placeBuilding(new Wall(x, y, 'W'), x, y);
+                }
+            }
+        }
+    
+        // Draw a square of walls 5 tiles away from the base
+        const squareDistance = 5;
+        for (let x = this.entities.base.x - squareDistance; x <= this.entities.base.x + squareDistance; x++) {
+            for (let y = this.entities.base.y - squareDistance; y <= this.entities.base.y + squareDistance; y++) {
+                if (
+                    (x === this.entities.base.x - squareDistance || x === this.entities.base.x + squareDistance) ||
+                    (y === this.entities.base.y - squareDistance || y === this.entities.base.y + squareDistance)
+                ) {
+                    this.placeBuilding(new Wall(x, y, 'W'), x, y);
+                }
+            }
+        }
+    }    
 
     initEventListeners() {
         window.addEventListener('click', (event) => this.handleClick(event));
@@ -121,7 +159,7 @@ class Game {
                 path = this.pathFinder.findPath(monster.x, monster.y, this.entities.base.x, this.entities.base.y, monster);
                 monster.setPath(path);
             } else {
-                path.shift();
+                //path.shift();
                 monster.setPath(path);
             }
 
@@ -131,7 +169,9 @@ class Game {
                 let monsterAt = this.entities.monsters.find(m => m.x === nextPosition.x && m.y === nextPosition.y && m !== monster);
 
                 if (monsterAt) {
-                    this.combineMonsters(monster, monsterAt);
+                    //this.combineMonsters(monster, monsterAt);
+                    // skip turn
+                    return;
                 }
 
                 if (building) {
@@ -141,6 +181,7 @@ class Game {
                     }
                 } else {
                     monster.moveTo(nextPosition.x, nextPosition.y);
+                    path.shift();
                 }
             }
         });
@@ -350,9 +391,9 @@ class Game {
                this.upgradeBuilding(this.getBuildingAtPosition(x, y));
             }
         } else if (event.ctrlKey) {
-            this.placeBuilding(new Tower(x, y), x, y);
+            this.buyBuilding(new Tower(x, y), x, y);
         } else {
-            this.placeBuilding(new Wall(x, y, 'W'), x, y);
+            this.buyBuilding(new Wall(x, y, 'W'), x, y);
         }
     }
 
@@ -360,7 +401,7 @@ class Game {
         if (building instanceof Tower) {
             if (this.gold >= 50) {
                 this.removeBuilding(building);
-                this.placeBuilding(new BombTower(building.x, building.y), building.x, building.y);
+                this.buyBuilding(new BombTower(building.x, building.y), building.x, building.y);
             }
         }
     }
@@ -375,12 +416,16 @@ class Game {
         this.invalidateAllPaths();
     }
 
-    placeBuilding(building, x, y) {
-        if (this.isPositionOccupied(x, y)) return;
-
+    buyBuilding(building, x, y) {
         if(building.cost > this.gold) return;
 
         this.gold -= building.cost;
+
+        this.placeBuilding(building, building.x, building.y);
+    }
+
+    placeBuilding(building, x, y) {
+        if (this.isPositionOccupied(x, y)) return;
 
         if (building instanceof Tower || building instanceof BombTower) {
             this.entities.towers.push(building);

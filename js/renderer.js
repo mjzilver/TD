@@ -3,37 +3,58 @@ import { Bomb } from "./entities/bomb.js";
 import { Boss } from "./entities/boss.js";
 import { TileImage } from "./entities/tile-image.js";
 
-// load the images
+// load the images with optional rotation
 const tiles = {
-    'tower': new TileImage("tower", "tiles/tower.png"),
-    'bombTower': new TileImage("bombTower", "tiles/bomb-tower.png"),
-    'monster': new TileImage("monster", "tiles/enemy.png"),
-    'ground': new TileImage("ground", "tiles/grass.png"),
-    'base': new TileImage("base", "tiles/base.png"),
-    'bomb': new TileImage("bomb", "tiles/bomb.png"),
-    'boss': new TileImage("boss", "tiles/boss.png"),
-    'wall': new TileImage("wall", "tiles/wall.png"),
-    'horizontal-wall': new TileImage("horizontal-wall", "tiles/horizontal-wall.png"),
-    'vertical-wall': new TileImage("vertical-wall", "tiles/vertical-wall.png"),
-    'corner-wall-top-right': new TileImage("corner-wall-top-right", "tiles/corner-wall-top-right.png"),
-    'corner-wall-top-left': new TileImage("corner-wall-top-left", "tiles/corner-wall-top-left.png"),
-    'corner-wall-bottom-right': new TileImage("corner-wall-bottom-right", "tiles/corner-wall-bottom-right.png"),
-    'corner-wall-bottom-left': new TileImage("corner-wall-bottom-left", "tiles/corner-wall-bottom-left.png"),
-    'wall-north': new TileImage("wall-north", "tiles/wall-north.png"),
-    'wall-east': new TileImage("wall-east", "tiles/wall-east.png"),
-    'wall-south': new TileImage("wall-south", "tiles/wall-south.png"),
-    'wall-west': new TileImage("wall-west", "tiles/wall-west.png"),
-    'asterisk': new TileImage("asterisk", "tiles/asterisk.png"),
-};
+    'tower': new TileImage("tiles/tower.png"),
+    'bombTower': new TileImage("tiles/bomb-tower.png"),
+    'monster': new TileImage("tiles/enemy.png"),
+    'ground': new TileImage("tiles/grass.png"),
 
+    'base': new TileImage("tiles/base.png"),
+    'bomb': new TileImage("tiles/bomb.png"),
+    'boss': new TileImage("tiles/boss.png"),
+    'asterisk': new TileImage("tiles/asterisk.png"),
+
+    /// TERRAIN
+    'grass': new TileImage("tiles/grass.png"),
+    'rock': new TileImage("tiles/rock.png"),
+    'sand': new TileImage("tiles/sand.png"),
+    // connection/transitions
+    'sand-grass-top': new TileImage("tiles/sand-grass-top.png", 0),
+    'sand-grass-right': new TileImage("tiles/sand-grass-right.png", 0),
+    'sand-grass-bottom': new TileImage("tiles/sand-grass-top.png", 180),
+    'sand-grass-left': new TileImage("tiles/sand-grass-right.png", 180),
+    // corners
+    'sand-grass-top-left': new TileImage("tiles/sand-grass-top-left.png", 0),
+    'sand-grass-top-right': new TileImage("tiles/sand-grass-top-left.png", 90),
+    'sand-grass-bottom-right': new TileImage("tiles/sand-grass-top-left.png", 180),
+    'sand-grass-bottom-left': new TileImage("tiles/sand-grass-top-left.png", 270),
+
+    /// WALLS
+    'wall': new TileImage("tiles/wall.png"),
+    // two sided connections
+    'horizontal-wall': new TileImage("tiles/horizontal-wall.png"),
+    'vertical-wall': new TileImage("tiles/vertical-wall.png"),
+    // corners
+    'corner-wall-top-left': new TileImage("tiles/corner-wall-top-left.png", 0),
+    'corner-wall-top-right': new TileImage("tiles/corner-wall-top-left.png", 90),
+    'corner-wall-bottom-right': new TileImage("tiles/corner-wall-top-left.png", 180),
+    'corner-wall-bottom-left': new TileImage("tiles/corner-wall-top-left.png", 270),
+
+    // one sided connections
+    'wall-north': new TileImage("tiles/wall-north.png", 0),
+    'wall-east': new TileImage("tiles/wall-north.png", 90),
+    'wall-south': new TileImage("tiles/wall-north.png", 180),
+    'wall-west': new TileImage("tiles/wall-north.png", 270),
+};
 
 export function render(ctx, entities, cameraX, cameraY, tileSize, mapWidth, mapHeight) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    drawMap(ctx, cameraX, cameraY, tileSize, mapWidth, mapHeight);
+    drawMap(ctx, entities, cameraX, cameraY, tileSize, mapWidth, mapHeight);
     drawEntities(ctx, entities, cameraX, cameraY, tileSize);
 }
 
-function drawMap(ctx, cameraX, cameraY, tileSize, mapWidth, mapHeight) {
+function drawMap(ctx, entities, cameraX, cameraY, tileSize, mapWidth, mapHeight) {
     ctx.strokeStyle = 'gray';
     for (let y = 0; y < mapHeight; y++) {
         for (let x = 0; x < mapWidth; x++) {
@@ -42,7 +63,9 @@ function drawMap(ctx, cameraX, cameraY, tileSize, mapWidth, mapHeight) {
 
             if (screenX + tileSize > 0 && screenX < ctx.canvas.width && screenY + tileSize > 0 && screenY < ctx.canvas.height) {
                 //ctx.strokeRect(screenX, screenY, tileSize, tileSize);
-                ctx.drawImage(tiles.ground.image, screenX, screenY, tileSize, tileSize);
+                var terrainTile = entities.terrain[x][y];
+                var tile = tiles[terrainTile];
+                drawRotatedTile(ctx, tile, screenX, screenY, tileSize);
             }
         }
     }
@@ -52,28 +75,28 @@ function drawEntities(ctx, entities, cameraX, cameraY, tileSize) {
     // set font for entities
     ctx.font = `${tileSize}px Monospace`;
 
-    drawTile(ctx, 'base', entities.base.x, entities.base.y, tileSize);
+    drawTile(ctx, tiles['base'], entities.base.x, entities.base.y, tileSize);
 
     entities.towers.forEach(tower => { 
         if (tower instanceof BombTower) {
-            drawTile(ctx, 'bombTower', tower.x, tower.y, tileSize);
+            drawTile(ctx, tiles['bombTower'], tower.x, tower.y, tileSize);
         } else {
-            drawTile(ctx, 'tower', tower.x, tower.y, tileSize);
+            drawTile(ctx, tiles['tower'], tower.x, tower.y, tileSize);
         }
     });
 
     entities.walls.forEach(wall => {
-        drawTile(ctx, wall.getRenderData(), wall.x, wall.y, tileSize);
+        drawTile(ctx, tiles[wall.getRenderData()], wall.x, wall.y, tileSize);
     });
 
     entities.monsters.forEach(monster => {
         if (monster instanceof Boss) {
-            drawTile(ctx, 'boss', monster.x, monster.y, tileSize);
+            drawTile(ctx, tiles['boss'], monster.x, monster.y, tileSize);
         } else {
-            drawTile(ctx, 'monster', monster.x, monster.y, tileSize);
+            drawTile(ctx, tiles['monster'], monster.x, monster.y, tileSize);
         }
-    });	
-    
+    });    
+
     entities.arrows.forEach(arrow => {
         if (arrow instanceof Bomb) {
             ctx.drawImage(tiles.bomb.image, 
@@ -89,5 +112,17 @@ function drawEntities(ctx, entities, cameraX, cameraY, tileSize) {
 }
 
 function drawTile(ctx, tile, x, y, tileSize) {
-    ctx.drawImage(tiles[tile].image, x * tileSize, y * tileSize, tileSize, tileSize);
+    drawRotatedTile(ctx, tile, x * tileSize, y * tileSize, tileSize);
+}
+
+function drawRotatedTile(ctx, tile, x, y, tileSize) {
+    if (tile.rotate) {
+        ctx.save();
+        ctx.translate(x + tileSize / 2, y + tileSize / 2);
+        ctx.rotate(tile.rotate * Math.PI / 180);
+        ctx.drawImage(tile.image, -tileSize / 2, -tileSize / 2, tileSize, tileSize);
+        ctx.restore();
+    } else {
+        ctx.drawImage(tile.image, x, y, tileSize, tileSize);
+    }
 }

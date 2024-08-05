@@ -20,3 +20,7 @@ export class PriorityQueue {
 export function outOfBoundsCheck(x, y, mapWidth, mapHeight) {
     return x < 0 || x >= mapWidth || y < 0 || y >= mapHeight;
 }
+
+export function randomBetween(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
