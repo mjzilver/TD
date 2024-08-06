@@ -1,8 +1,9 @@
 import { Boss } from './entities/boss.js';
 import { Monster } from './entities/monster.js';
+import { TankMonster } from './entities/tank-monster.js';
 
 const highest = 5 * 6000;
-const bossSpawnInterval = 500;
+const bossSpawnInterval = 1000;
 
 export class MonsterSpawner {
     constructor(mapWidth, mapHeight) {
@@ -28,7 +29,7 @@ export class MonsterSpawner {
         if (currentTicks - this.previousTicks < spawnInterval) {
             return;
         }
-         // 0: Top, 1: Right, 2: Bottom, 3: Left
+        // 0: Top, 1: Right, 2: Bottom, 3: Left
         const edge = Math.floor(Math.random() * 4);
         let x = 0;
         let y = 0;
@@ -54,12 +55,19 @@ export class MonsterSpawner {
 
         let mon = new Monster(x, y);
 
-        if (this.lastBossSpawn + bossSpawnInterval < currentTicks) {
-            mon = new Boss(x, y);
-            this.lastBossSpawn = currentTicks;
+        // 5% chance to spawn a tank monster
+        if (Math.random() < 0.05) {
+            mon = new TankMonster(x, y);
         } else {
-            mon.hp = Math.floor(this.linearInterpolation(currentTicks, highest, 50, 5));
-            mon.damage = Math.floor(this.linearInterpolation(currentTicks, highest, 8, 1));
+            // spawn a boss monster
+            if (this.lastBossSpawn + bossSpawnInterval < currentTicks) {
+                mon = new Boss(x, y);
+                this.lastBossSpawn = currentTicks;
+            // spawn a scaled monster
+            } else {
+                mon.hp = Math.floor(this.linearInterpolation(currentTicks, highest, 50, 5));
+                mon.damage = Math.floor(this.linearInterpolation(currentTicks, highest, 8, 1));
+            }
         }
 
         // Check if the spawn point is blocked
@@ -76,7 +84,7 @@ export class MonsterSpawner {
                 }
             }
         }
-    
+
         monsters.push(mon);
         this.previousTicks = currentTicks;
     }

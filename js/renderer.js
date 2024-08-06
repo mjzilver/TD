@@ -2,20 +2,25 @@ import { BombTower } from "./entities/bomb-tower.js";
 import { Bomb } from "./entities/bomb.js";
 import { Boss } from "./entities/boss.js";
 import { TileImage } from "./entities/tile-image.js";
+import { TankMonster } from "./entities/tank-monster.js";
 
 // load the images with optional rotation
 const tiles = {
+    // buildings
     'tower': new TileImage("tiles/tower.png"),
     'bombTower': new TileImage("tiles/bomb-tower.png"),
-    'monster': new TileImage("tiles/enemy.png"),
-    'ground': new TileImage("tiles/grass.png"),
-
     'base': new TileImage("tiles/base.png"),
+
+    // projectiles
     'bomb': new TileImage("tiles/bomb.png"),
-    'boss': new TileImage("tiles/boss.png"),
     'asterisk': new TileImage("tiles/asterisk.png"),
 
-    /// TERRAIN
+    // Monsters
+    'monster': new TileImage("tiles/enemy.png"),
+    'tank-monster': new TileImage("tiles/tank-monster.png"),
+    'boss': new TileImage("tiles/boss.png"),
+
+    // terrain
     'grass': new TileImage("tiles/grass.png"),
     'rock': new TileImage("tiles/rock.png"),
     'sand': new TileImage("tiles/sand.png"),
@@ -30,18 +35,15 @@ const tiles = {
     'sand-grass-bottom-right': new TileImage("tiles/sand-grass-top-left.png", 180),
     'sand-grass-bottom-left': new TileImage("tiles/sand-grass-top-left.png", 270),
 
-    /// WALLS
+    /// Walls
     'wall': new TileImage("tiles/wall.png"),
-
     // four sided connections
     'wall-all': new TileImage("tiles/wall-all.png"),
-
     // three sided connections
     'wall-three-top': new TileImage("tiles/wall-three-top.png"),
     'wall-three-right': new TileImage("tiles/wall-three-top.png", 90),
     'wall-three-bottom': new TileImage("tiles/wall-three-top.png", 180),
     'wall-three-left': new TileImage("tiles/wall-three-top.png", 270),
-
     // two sided connections
     'horizontal-wall': new TileImage("tiles/horizontal-wall.png"),
     'vertical-wall': new TileImage("tiles/vertical-wall.png"),
@@ -50,7 +52,6 @@ const tiles = {
     'corner-wall-top-right': new TileImage("tiles/corner-wall-top-left.png", 90),
     'corner-wall-bottom-right': new TileImage("tiles/corner-wall-top-left.png", 180),
     'corner-wall-bottom-left': new TileImage("tiles/corner-wall-top-left.png", 270),
-
     // one sided connections
     'wall-north': new TileImage("tiles/wall-north.png", 0),
     'wall-east': new TileImage("tiles/wall-north.png", 90),
@@ -102,6 +103,8 @@ function drawEntities(ctx, entities, cameraX, cameraY, tileSize) {
     entities.monsters.forEach(monster => {
         if (monster instanceof Boss) {
             drawTile(ctx, tiles['boss'], monster.x, monster.y, tileSize);
+        } else if (monster instanceof TankMonster) {
+            drawTile(ctx, tiles['tank-monster'], monster.x, monster.y, tileSize);
         } else {
             drawTile(ctx, tiles['monster'], monster.x, monster.y, tileSize);
         }

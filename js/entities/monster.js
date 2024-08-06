@@ -8,7 +8,7 @@ export class Monster extends GameEntity {
         this.hp = 10;
         this.startHp = this.hp;
         this.damage = 1;
-        this.canMoveDiagonally = false;
+        this.canMoveDiagonally = true;
     }
 
     moveTo(x, y) {

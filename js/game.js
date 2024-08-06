@@ -169,7 +169,6 @@ class Game {
                 let monsterAt = this.entities.monsters.find(m => m.x === nextPosition.x && m.y === nextPosition.y && m !== monster);
 
                 if (monsterAt) {
-                    //this.combineMonsters(monster, monsterAt);
                     // skip turn
                     return;
                 }
@@ -179,11 +178,13 @@ class Game {
                     this.createParticlesAtTile(5, nextPosition.x, nextPosition.y, "black");
                     if (building.hp <= 0) {
                         this.destroyBuilding(building);
+                        this.invalidateAllPaths();
                     }
                 } else {
                     monster.moveTo(nextPosition.x, nextPosition.y);
-                    path.shift();
                 }
+                // move to next position
+                path.shift();
             }
         });
     }
@@ -370,6 +371,8 @@ class Game {
     }
 
     damageMonster(monster, damage) {
+        console.log(`Monster at ${monster.x}, ${monster.y} with ${monster.hp}hp took ${damage} damage`);
+
         monster.hp -= damage;
         this.createParticlesAtTile(damage, monster.x, monster.y, "red");
 

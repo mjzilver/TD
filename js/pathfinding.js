@@ -53,7 +53,7 @@ export class PathFinder {
             }
         }
 
-        return this.reconstructPath(start, goal, cameFrom);
+        return this.reconstructPath(start, goal, cameFrom, monster);
     }
 
     // Heuristic function: Manhattan distance
@@ -97,12 +97,21 @@ export class PathFinder {
     }
 
     // Function to reconstruct the path from start to goal
-    reconstructPath(start, goal, cameFrom) {
+    reconstructPath(start, goal, cameFrom, monster) {
         const path = [];
         let current = goal;
         let currentKey = `${current.x},${current.y}`;
 
         while (currentKey) {
+            // if building is in the path add it per turn it takes to destroy it
+            const building = this.game.getBuildingAtPosition(current.x, current.y);
+
+            if (building) {
+                for (let i = 0; i < Math.ceil(building.hp / monster.damage); i++) {
+                    path.push({ x: current.x, y: current.y });
+                }
+            }
+
             path.push({ x: current.x, y: current.y });
             current = cameFrom[currentKey];
             if (current) {

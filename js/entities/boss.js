@@ -5,7 +5,7 @@ export class Boss extends Monster {
         super(x, y);
         this.char = 'X';
         this.path = [];
-        this.hp = 100;
+        this.hp = 50;
         this.damage = 10;
         this.canMoveDiagonally = true;
     }
